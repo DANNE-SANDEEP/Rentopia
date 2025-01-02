@@ -35,7 +35,7 @@ const Home = () => {
   };
 
   return (
-    <section className="min-h-screen max-w-[1440px] mx-auto">
+    <section className="min-h-screen max-w-[1570px] mx-auto">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
         {/* Left Side - Booking Interface */}
         <div className="p-8 lg:p-16 flex flex-col justify-center">

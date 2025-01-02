@@ -97,7 +97,7 @@ const AvailableCars = () => {
   const filteredCars = filterCars(cars);
 
   return (
-    <div className="bg-white min-h-screen text-gray-800 p-4">
+    <div className=" min-h-screen max-w-[1480px] mx-auto text-gray-800 p-4">
       <div className="container mx-auto">
         {/* Header with slide-in animation */}
         <div className="flex items-center gap-2 mb-6 animate-fade-in">
@@ -179,7 +179,7 @@ const AvailableCars = () => {
           {filteredCars.map((vehicle, index) => (
             <div 
               key={vehicle.id} 
-              className="bg-gray-50 rounded-lg overflow-hidden transition-all duration-500 ease-in-out hover:scale-105 hover:shadow-xl"
+              className="bg-white rounded-lg overflow-hidden transition-all duration-500 ease-in-out hover:scale-105 shadow-lg hover:shadow-2xl"
               style={{
                 animation: `fadeSlideIn 0.5s ease-out ${index * 0.1}s both`
               }}

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Plus, X, Trash2 } from 'lucide-react';
 
 const Card = ({ children, className = '' }) => (
-  <div className={`bg-gray-50 rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 ${className}`}>
+  <div className={`bg-gray-50 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 ${className}`}>
     {children}
   </div>
 );
@@ -29,7 +29,7 @@ const Modal = ({ isOpen, onClose, children }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center p-4 backdrop-blur-sm z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center p-4 backdrop-blur-sm z-50 ">
       <div className="bg-white rounded-lg p-6 max-w-md w-full text-gray-800 relative animate-fadeIn">
         {children}
         <button 
@@ -90,7 +90,7 @@ const CarsAdded = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white text-gray-800">
+    <div className="min-h-screen text-gray-800 max-w-[1480px] mx-auto">
       <div className="container mx-auto p-4">
         <div className="flex justify-between items-center mb-6 pb-4">
           <h1 className="text-2xl sm:text-3xl font-bold">Cars Added</h1>
