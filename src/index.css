@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Apply Inter font globally */
+html, body {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Hide scrollbar */
+::-webkit-scrollbar {
+  display: none;
+}
