@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { LineChart, XAxis, YAxis, Tooltip, Line, BarChart, Bar, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { Wrench, Clock, Star, CheckCircle, AlertCircle, User, Calendar, Settings, DollarSign, Award } from 'lucide-react';
+import { LineChart, XAxis, YAxis, Tooltip, Line, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { Clock, Star, CheckCircle, DollarSign, Award } from 'lucide-react';
 
 const Alert = ({ children, className }) => (
   <div className={`p-4 rounded-lg ${className}`}>

@@ -1,58 +1,192 @@
-import React, { useState } from 'react';
-import { LineChart, XAxis, YAxis, Tooltip, Line, BarChart, Bar, ResponsiveContainer } from 'recharts';
-import { Users, UserPlus, Settings, DollarSign, TrendingUp, User, Trash2, Search, Clock, AlertTriangle } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import {
+  LineChart,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Line,
+  BarChart,
+  Bar,
+  ResponsiveContainer,
+} from "recharts";
+import {
+  Users,
+  UserPlus,
+  Settings,
+  DollarSign,
+  TrendingUp,
+  User,
+  Trash2,
+  Search,
+  Clock,
+  AlertTriangle,
+  MessageCircle,
+} from "lucide-react";
+import axios from "axios";
 
 const Alert = ({ children, className }) => (
-  <div className={`p-4 rounded-lg ${className}`}>
-    {children}
-  </div>
+  <div className={`p-4 rounded-lg ${className}`}>{children}</div>
 );
 
+const AdminMessages = ({ onMessageCountChange }) => {
+  const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchMessages = async () => {
+    try {
+      const response = await axios.get("http://localhost:3001/api/contacts");
+      setMessages(response.data);
+      onMessageCountChange(response.data.length);
+      setLoading(false);
+    } catch (error) {
+      setError("Failed to fetch messages");
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMessages();
+  }, [onMessageCountChange]);
+
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`http://localhost:3001/api/contacts/${id}`);
+      fetchMessages();
+    } catch (error) {
+      setError("Failed to delete message");
+    }
+  };
+
+  if (loading)
+    return <div className="text-center p-4">Loading messages...</div>;
+  if (error) return <div className="text-center text-red-600 p-4">{error}</div>;
+
+  return (
+    <div className="bg-white p-4 pb-10 rounded-lg shadow-sm mb-6">
+      <h3 className="text-lg font-semibold mb-4">Contact Messages</h3>
+      <div className="space-y-4">
+        {messages.map((message) => (
+          <div
+            key={message._id}
+            className="p-4 border rounded-lg hover:bg-gray-50"
+          >
+            <div className="flex justify-between items-start">
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <p className="font-medium">{message.name}</p>
+                  <p className="text-sm text-gray-500">({message.email})</p>
+                </div>
+                <p className="text-gray-700">{message.message}</p>
+                <p className="text-xs text-gray-500">
+                  {new Date(message.submittedAt).toLocaleString()}
+                </p>
+              </div>
+              <button
+                onClick={() => handleDelete(message._id)}
+                className="p-2 text-red-600 hover:bg-red-50 rounded-full"
+                title="Delete message"
+              >
+                <Trash2 className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        ))}
+        {messages.length === 0 && (
+          <p className="text-center text-gray-500">No messages found</p>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState("overview");
   const [showAddManagerForm, setShowAddManagerForm] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [alertMessage, setAlertMessage] = useState('');
-  
+  const [searchTerm, setSearchTerm] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+  const [showMessages, setShowMessages] = useState(false);
+  const [messageCount, setMessageCount] = useState(0);
+
   const [newManager, setNewManager] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    branch: '',
-    experience: ''
+    name: "",
+    email: "",
+    phone: "",
+    branch: "",
+    experience: "",
   });
 
   const revenueData = [
-    { name: 'Week 1', weekly: 15000, monthly: 65000, yearly: 780000 },
-    { name: 'Week 2', weekly: 18000, monthly: 72000, yearly: 820000 },
-    { name: 'Week 3', weekly: 16500, monthly: 68000, yearly: 795000 },
-    { name: 'Week 4', weekly: 19000, monthly: 75000, yearly: 850000 }
+    { name: "Week 1", weekly: 15000, monthly: 65000, yearly: 780000 },
+    { name: "Week 2", weekly: 18000, monthly: 72000, yearly: 820000 },
+    { name: "Week 3", weekly: 16500, monthly: 68000, yearly: 795000 },
+    { name: "Week 4", weekly: 19000, monthly: 75000, yearly: 850000 },
   ];
 
   const managers = [
-    { id: 1, name: "John Smith", branch: "Downtown", mechanics: 8, completedTasks: 145, rating: 4.7 },
-    { id: 2, name: "Emily Brown", branch: "Westside", mechanics: 6, completedTasks: 120, rating: 4.8 }
+    {
+      id: 1,
+      name: "John Smith",
+      branch: "Downtown",
+      mechanics: 8,
+      completedTasks: 145,
+      rating: 4.7,
+    },
+    {
+      id: 2,
+      name: "Emily Brown",
+      branch: "Westside",
+      mechanics: 6,
+      completedTasks: 120,
+      rating: 4.8,
+    },
   ];
 
   const recentActivities = [
-    { id: 1, type: 'task', message: 'New repair task assigned to Downtown branch', time: '2 hours ago' },
-    { id: 2, type: 'alert', message: 'Inventory running low on brake pads', time: '3 hours ago' },
-    { id: 3, type: 'task', message: 'Monthly maintenance completed for Fleet #123', time: '5 hours ago' },
-    { id: 4, type: 'alert', message: 'Urgent: Equipment maintenance required', time: '6 hours ago' }
+    {
+      id: 1,
+      type: "task",
+      message: "New repair task assigned to Downtown branch",
+      time: "2 hours ago",
+    },
+    {
+      id: 2,
+      type: "alert",
+      message: "Inventory running low on brake pads",
+      time: "3 hours ago",
+    },
+    {
+      id: 3,
+      type: "task",
+      message: "Monthly maintenance completed for Fleet #123",
+      time: "5 hours ago",
+    },
+    {
+      id: 4,
+      type: "alert",
+      message: "Urgent: Equipment maintenance required",
+      time: "6 hours ago",
+    },
   ];
 
   const pendingTasks = [
-    { id: 1, task: 'Vehicle Inspection', priority: 'High', deadline: 'Today' },
-    { id: 2, task: 'Oil Change', priority: 'Medium', deadline: 'Tomorrow' },
-    { id: 3, task: 'Brake Replacement', priority: 'High', deadline: 'Today' }
+    { id: 1, task: "Vehicle Inspection", priority: "High", deadline: "Today" },
+    { id: 2, task: "Oil Change", priority: "Medium", deadline: "Tomorrow" },
+    { id: 3, task: "Brake Replacement", priority: "High", deadline: "Today" },
   ];
 
   const handleAddManager = (e) => {
     e.preventDefault();
-    setAlertMessage('Manager added successfully');
+    setAlertMessage("Manager added successfully");
     setShowAddManagerForm(false);
-    setNewManager({ name: '', email: '', phone: '', branch: '', experience: '' });
-    setTimeout(() => setAlertMessage(''), 3000);
+    setNewManager({
+      name: "",
+      email: "",
+      phone: "",
+      branch: "",
+      experience: "",
+    });
+    setTimeout(() => setAlertMessage(""), 3000);
   };
 
   const renderOverviewSection = () => (
@@ -63,7 +197,7 @@ const AdminDashboard = () => {
           <div className="space-y-4">
             {recentActivities.map((activity) => (
               <div key={activity.id} className="flex items-start space-x-3">
-                {activity.type === 'alert' ? (
+                {activity.type === "alert" ? (
                   <AlertTriangle className="w-5 h-5 text-yellow-500 mt-1" />
                 ) : (
                   <Clock className="w-5 h-5 text-blue-500 mt-1" />
@@ -81,14 +215,21 @@ const AdminDashboard = () => {
           <h3 className="text-lg font-semibold mb-4">Pending Tasks</h3>
           <div className="space-y-4">
             {pendingTasks.map((task) => (
-              <div key={task.id} className="flex items-center justify-between border-b pb-3">
+              <div
+                key={task.id}
+                className="flex items-center justify-between border-b pb-3"
+              >
                 <div>
                   <p className="font-medium">{task.task}</p>
                   <p className="text-sm text-gray-500">Due: {task.deadline}</p>
                 </div>
-                <span className={`px-2 py-1 rounded text-xs ${
-                  task.priority === 'High' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
-                }`}>
+                <span
+                  className={`px-2 py-1 rounded text-xs ${
+                    task.priority === "High"
+                      ? "bg-red-100 text-red-800"
+                      : "bg-yellow-100 text-yellow-800"
+                  }`}
+                >
                   {task.priority}
                 </span>
               </div>
@@ -105,9 +246,24 @@ const AdminDashboard = () => {
               <XAxis dataKey="name" />
               <YAxis />
               <Tooltip />
-              <Line type="monotone" dataKey="weekly" stroke="#2563eb" name="Weekly" />
-              <Line type="monotone" dataKey="monthly" stroke="#7c3aed" name="Monthly" />
-              <Line type="monotone" dataKey="yearly" stroke="#059669" name="Yearly" />
+              <Line
+                type="monotone"
+                dataKey="weekly"
+                stroke="#2563eb"
+                name="Weekly"
+              />
+              <Line
+                type="monotone"
+                dataKey="monthly"
+                stroke="#7c3aed"
+                name="Monthly"
+              />
+              <Line
+                type="monotone"
+                dataKey="yearly"
+                stroke="#059669"
+                name="Yearly"
+              />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -118,7 +274,11 @@ const AdminDashboard = () => {
               <XAxis dataKey="branch" />
               <YAxis />
               <Tooltip />
-              <Bar dataKey="completedTasks" fill="#2563eb" name="Completed Tasks" />
+              <Bar
+                dataKey="completedTasks"
+                fill="#2563eb"
+                name="Completed Tasks"
+              />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -204,7 +364,11 @@ const AdminDashboard = () => {
       <div className="bg-white p-6 rounded-lg shadow-sm">
         <h3 className="text-lg font-semibold mb-4">Performance Metrics</h3>
         <div className="space-y-4">
-          {['Customer Retention', 'First-Time Fix Rate', 'Parts Availability'].map((metric) => (
+          {[
+            "Customer Retention",
+            "First-Time Fix Rate",
+            "Parts Availability",
+          ].map((metric) => (
             <div key={metric} className="flex items-center justify-between">
               <span className="text-gray-600">{metric}</span>
               <div className="w-2/3 bg-gray-200 rounded-full h-2">
@@ -231,12 +395,26 @@ const AdminDashboard = () => {
 
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
-          <div className="bg-white p-4 rounded-lg shadow-sm">
-            <DollarSign className="w-6 h-6 text-green-600 mb-1" />
-            <p className="text-sm text-gray-600">Total Revenue</p>
-            <p className="text-xl font-bold">$850,000</p>
+          <div className="flex space-x-4">
+            <div className="bg-white p-4 rounded-lg shadow-sm">
+              <DollarSign className="w-6 h-6 text-green-600 mb-1" />
+              <p className="text-sm text-gray-600">Total Revenue</p>
+              <p className="text-xl font-bold">$850,000</p>
+            </div>
+            <button
+              onClick={() => setShowMessages(!showMessages)}
+              className="bg-white p-4 rounded-lg shadow-sm hover:bg-gray-50"
+            >
+              <MessageCircle className="w-6 h-6 text-blue-600 mb-1" />
+              <p className="text-sm text-gray-600">Messages</p>
+              <p className="text-xl font-bold">{messageCount}</p>
+            </button>
           </div>
         </div>
+
+        {showMessages && (
+          <AdminMessages onMessageCountChange={setMessageCount} />
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-white p-6 rounded-lg shadow-sm">
@@ -264,11 +442,13 @@ const AdminDashboard = () => {
         <div className="bg-white rounded-lg shadow-sm">
           <div className="border-b">
             <div className="flex space-x-8 px-6">
-              {['overview', 'managers', 'analytics'].map((tab) => (
+              {["overview", "managers", "analytics"].map((tab) => (
                 <button
                   key={tab}
                   className={`py-4 px-2 capitalize ${
-                    activeTab === tab ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500'
+                    activeTab === tab
+                      ? "border-b-2 border-blue-600 text-blue-600"
+                      : "text-gray-500"
                   }`}
                   onClick={() => setActiveTab(tab)}
                 >
@@ -279,9 +459,9 @@ const AdminDashboard = () => {
           </div>
 
           <div className="p-6">
-            {activeTab === 'overview' && renderOverviewSection()}
-            {activeTab === 'managers' && renderManagersSection()}
-            {activeTab === 'analytics' && renderAnalyticsSection()}
+            {activeTab === "overview" && renderOverviewSection()}
+            {activeTab === "managers" && renderManagersSection()}
+            {activeTab === "analytics" && renderAnalyticsSection()}
           </div>
         </div>
 
@@ -296,9 +476,14 @@ const AdminDashboard = () => {
                       {field}
                     </label>
                     <input
-                      type={field === 'email' ? 'email' : 'text'}
+                      type={field === "email" ? "email" : "text"}
                       value={newManager[field]}
-                      onChange={(e) => setNewManager({ ...newManager, [field]: e.target.value })}
+                      onChange={(e) =>
+                        setNewManager({
+                          ...newManager,
+                          [field]: e.target.value,
+                        })
+                      }
                       className="w-full px-4 py-2 border rounded-lg"
                       placeholder={`Enter ${field}`}
                     />
