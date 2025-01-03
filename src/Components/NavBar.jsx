@@ -10,7 +10,7 @@ const NavBar = () => {
   const checkLoginStatus = () => {
     const cookies = document.cookie.split('; ');
     const userCookie = cookies.find((row) => row.startsWith('user_id='));
-    setIsLoggedIn(!userCookie);
+    setIsLoggedIn(!!userCookie);
   };
 
   useEffect(() => {
