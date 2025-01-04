@@ -71,15 +71,15 @@ const AvailableCars = () => {
   const filteredCars = filterCars(cars);
 
   // Add this at the very beginning of your return statement
-  if (isLoading) {
-    return <Loader />;
-  }
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-red-500 text-xl">{error}</p>
       </div>
     );
+  }
+  if (isLoading) {
+    return <Loader />;
   }
   return (
     <div className=" min-h-screen max-w-[1480px] mx-auto text-gray-800 p-4">
@@ -96,7 +96,7 @@ const AvailableCars = () => {
         </div>
 
         {/* Search and Filters with slide animation */}
-        <div className={`mb-8 md:space-y-4 transition-all duration-500 ease-in-out overflow-hidden ${isFiltersVisible ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
+        <div className={` md:space-y-4 transition-all duration-500 ease-in-out overflow-hidden ${isFiltersVisible ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
           <div className="flex flex-col md:flex-row gap-4 md:h-24 w-full">
             <div className="relative flex-1 mt-2 ml-1 md:mr-0 mr-2">
               <Search className="absolute left-3 top-2 text-gray-400" />

@@ -1,7 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import NavBar from './Components/NavBar';
-import Footer from './Components/Footer';  // Add this import
 import Home from './Pages/Home';
 import AvailableCars from './Pages/AvailableCars';
 import CarsAdded from './Pages/CarsAdded';
@@ -32,7 +31,6 @@ const App = () => {
             <Route path='/admindashboard' element={<AdminDashboard />} />
           </Routes>
         </div>
-        <Footer />
       </div>
     </Router>
   );
