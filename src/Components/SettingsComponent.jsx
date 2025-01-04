@@ -43,7 +43,7 @@ const SettingsComponent = () => {
             icon={<Shield size={24} />}
             title="Privacy"
             description="Control your data and privacy preferences"
-            onClick={() => console.log('Navigate to Privacy settings')}
+            onClick={() => console.log('Navigate to Privacy settings')}s
           />
 
           <SettingSection
