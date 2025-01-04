@@ -205,6 +205,88 @@ app.get("/api/cars", async (req, res) => {
   }
 });
 
+//profile section update
+app.get("/profile", async (req, res) => {
+  const userId = req.cookies.user_id;
+
+  if (!userId) {
+    return res.status(401).json({ errorMessage: "Not authenticated" });
+  }
+
+  try {
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({ errorMessage: "User not found" });
+    }
+
+    // Return all the required profile information
+    const userProfile = {
+      userName: user.userName,
+      email: user.email,
+      dateOfBirth: user.dateOfBirth,
+      role: user.role,
+      createdAt: user.createdAt,
+      // Add these fields to your User schema if they don't exist
+      rentalCount: 0, // You can update this based on your rental tracking logic
+      accountStatus: "Active", // You can make this dynamic based on user status
+      rating: 0 // You can implement a rating system later
+    };
+
+    res.status(200).json(userProfile);
+  } catch (err) {
+    console.error("Error fetching profile:", err);
+    res.status(500).json({ errorMessage: "Error fetching profile data" });
+  }
+});
+
+// Add a route to handle profile updates
+app.put("/profile/update", async (req, res) => {
+  const userId = req.cookies.user_id;
+
+  if (!userId) {
+    return res.status(401).json({ errorMessage: "Not authenticated" });
+  }
+
+  try {
+    const updates = req.body;
+    const allowedUpdates = ['userName', 'dateOfBirth']; // Add other fields that should be updatable
+    
+    // Filter out any fields that shouldn't be updateable
+    const filteredUpdates = Object.keys(updates)
+      .filter(key => allowedUpdates.includes(key))
+      .reduce((obj, key) => {
+        obj[key] = updates[key];
+        return obj;
+      }, {});
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $set: filteredUpdates },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ errorMessage: "User not found" });
+    }
+
+    res.status(200).json({
+      message: "Profile updated successfully",
+      user: {
+        userName: updatedUser.userName,
+        email: updatedUser.email,
+        dateOfBirth: updatedUser.dateOfBirth,
+        role: updatedUser.role,
+        createdAt: updatedUser.createdAt
+      }
+    });
+  } catch (err) {
+    console.error("Error updating profile:", err);
+    res.status(500).json({ errorMessage: "Error updating profile" });
+  }
+});
+
+
 // Add a new car
 app.post("/api/cars", async (req, res) => {
   try {

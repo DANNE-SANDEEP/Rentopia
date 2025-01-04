@@ -11,6 +11,9 @@ import ManagerDashboard from './Pages/ManagerDashboard';
 import MechanicDashboard from './Pages/MechanicDashboard';
 import AdminDashboard from './Pages/AdminDashboard';
 import Profile from './Components/Profile';
+import Wallet from './Components/Wallet';
+import MyBookingsComponent from './Components/MyBookings';
+import SettingsComponent from './Components/SettingsComponent';
 
 const App = () => {
   return (
@@ -27,6 +30,9 @@ const App = () => {
             <Route path='/dashboard' element={<DashBoard />}/>
             <Route path='/mdashboard' element={<ManagerDashboard />} />
             <Route path='/profile' element={<Profile />} />
+            <Route path='/wallet' element={<Wallet />} />
+            <Route path='/settings' element={<SettingsComponent />} />
+            <Route path='/bookings' element={<MyBookingsComponent />} />
             <Route path='/medashboard' element={<MechanicDashboard />} />
             <Route path='/admindashboard' element={<AdminDashboard />} />
           </Routes>
