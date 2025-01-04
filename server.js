@@ -5,9 +5,9 @@ const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const User = require("./models/userSchema");
-const Contact = require('./models/contactSchema');
-const Manager = require('./models/managerSchema');
-const Car = require('./models/availableCarsSchema');
+const Contact = require("./models/contactSchema");
+const Manager = require("./models/managerSchema");
+const Car = require("./models/availableCarsSchema");
 const app = express();
 
 app.use(cors({ origin: "http://localhost:3000", credentials: true }));
@@ -33,6 +33,8 @@ app.get("/api/managers", async (req, res) => {
   }
 });
 
+const jwt = require("jsonwebtoken");
+
 app.post("/manager/login", async (req, res) => {
   const { email, password } = req.body;
 
@@ -47,16 +49,23 @@ app.post("/manager/login", async (req, res) => {
       return res.status(401).json({ errorMessage: "Invalid credentials" });
     }
 
-    res.cookie("manager_id", manager._id, {
+    res.cookie("id", manager._id, {
       httpOnly: true,
       secure: false, // Set to true in production with HTTPS
       maxAge: 3600000, // 1 hour
     });
+    res.cookie("role", "manager", {
+      // Set role as manager
+      httpOnly: false, // Allow access from JS
+      secure: false, // Set to true in production with HTTPS
+      sameSite: "lax",
+      path: "/",
+    });
 
-    res.status(200).json({ 
+    res.status(200).json({
       message: "Login successful",
       managerId: manager._id,
-      branch: manager.branch 
+      branch: manager.branch,
     });
   } catch (err) {
     console.error(err);
@@ -64,14 +73,53 @@ app.post("/manager/login", async (req, res) => {
   }
 });
 
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ errorMessage: "User not found" });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ errorMessage: "Invalid credentials" });
+    }
+
+    res.cookie("id", user._id, {
+      httpOnly: true,
+      secure: false,
+      maxAge: 3600000,
+    });
+    res.cookie("role", "user", {
+      // Set role as user
+      httpOnly: false,
+      secure: false,
+      sameSite: "lax",
+      path: "/",
+    });
+
+    res.status(200).json({
+      message: "Login successful",
+      userId: user._id,
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ errorMessage: "Internal server error" });
+  }
+});
+
 app.post("/api/managers", async (req, res) => {
   try {
-    const { email, branch, password } = req.body;
-    
+    const { userName, email, branch, password } = req.body;
+
     // Check if manager already exists
     const existingManager = await Manager.findOne({ email });
     if (existingManager) {
-      return res.status(400).json({ errorMessage: "Manager with this email already exists" });
+      return res
+        .status(400)
+        .json({ errorMessage: "Manager with this email already exists" });
     }
 
     // Hash password
@@ -79,12 +127,13 @@ app.post("/api/managers", async (req, res) => {
 
     // Create new manager
     const newManager = new Manager({
+      userName,
       email,
       branch,
       password: hashedPassword,
       mechanics: 0,
       completedTasks: 0,
-      rating: 0
+      rating: 0,
     });
 
     await newManager.save();
@@ -127,7 +176,7 @@ app.delete("/api/contacts/:id", async (req, res) => {
 // User Routes
 app.post("/signup", async (req, res) => {
   const { email, userName, dateOfBirth, password } = req.body;
-  console.log('Incoming data:', req.body);
+  console.log("Incoming data:", req.body);
   try {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -140,58 +189,32 @@ app.post("/signup", async (req, res) => {
       email,
       dateOfBirth,
       password: hashedPassword,
-      role: 'user',
     });
 
     await newUser.save();
     res.status(201).json({ message: "User registered successfully" });
   } catch (err) {
     console.error("Signup Error:", err);
-    res.status(500).json({ errorMessage: err.message || "Internal server error" });
+    res
+      .status(500)
+      .json({ errorMessage: err.message || "Internal server error" });
   }
 });
 
-app.post('/contact', async (req, res) => {
+app.post("/contact", async (req, res) => {
   const { name, email, message } = req.body;
 
   if (!name || !email || !message) {
-    return res.status(400).json({ errorMessage: 'All fields are required.' });
+    return res.status(400).json({ errorMessage: "All fields are required." });
   }
 
   try {
     const contact = new Contact({ name, email, message });
     await contact.save();
-    res.status(200).json({ message: 'Message sent successfully!' });
+    res.status(200).json({ message: "Message sent successfully!" });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ errorMessage: 'Internal server error.' });
-  }
-});
-
-app.post("/login", async (req, res) => {
-  const { email, password } = req.body;
-
-  try {
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ errorMessage: "User not found" });
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(401).json({ errorMessage: "Invalid credentials" });
-    }
-
-    res.cookie("user_id", user._id, {
-      httpOnly: true,
-      secure: false,
-      maxAge: 3600000,
-    });
-
-    res.status(200).json({ message: "Login successful" });
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ errorMessage: "Internal server error" });
+    res.status(500).json({ errorMessage: "Internal server error." });
   }
 });
 
@@ -206,36 +229,92 @@ app.get("/api/cars", async (req, res) => {
 });
 
 //profile section update
-app.get("/profile", async (req, res) => {
-  const userId = req.cookies.user_id;
+// app.get("/profile", async (req, res) => {
+//   const userId = req.cookies.user_id;
 
-  if (!userId) {
+//   if (!userId) {
+//     return res.status(401).json({ errorMessage: "Not authenticated" });
+//   }
+
+//   try {
+//     const user = await User.findById(userId);
+
+//     if (!user) {
+//       return res.status(404).json({ errorMessage: "User not found" });
+//     }
+
+//     // Return all the required profile information
+//     const userProfile = {
+//       userName: user.userName,
+//       email: user.email,
+//       dateOfBirth: user.dateOfBirth,
+//       createdAt: user.createdAt,
+//       // Add these fields to your User schema if they don't exist
+//       rentalCount: 0, // You can update this based on your rental tracking logic
+//       accountStatus: "Active", // You can make this dynamic based on user status
+//       rating: 0 // You can implement a rating system later
+//     };
+
+//     res.status(200).json(userProfile);
+//   } catch (err) {
+//     console.error("Error fetching profile:", err);
+//     res.status(500).json({ errorMessage: "Error fetching profile data" });
+//   }
+// });
+app.get("/profile", async (req, res) => {
+  const role = req.cookies.role; // Extract role from cookies
+  const userId = req.cookies.id; // Dynamic cookie key based on role
+
+  console.log(role, userId);
+  if (!role || !userId) {
     return res.status(401).json({ errorMessage: "Not authenticated" });
   }
 
   try {
-    const user = await User.findById(userId);
-    
-    if (!user) {
-      return res.status(404).json({ errorMessage: "User not found" });
+    let profileData;
+
+    switch (role) {
+      case "user":
+        const user = await User.findById(userId);
+        if (!user) {
+          return res.status(404).json({ errorMessage: "User not found" });
+        }
+        profileData = {
+          userName: user.userName,
+          email: user.email,
+          dateOfBirth: user.dateOfBirth,
+          createdAt: user.createdAt,
+          rentalCount: 0, // Example: Implement logic to calculate rental count
+          accountStatus: "Active", // Example: Dynamic status based on business logic
+          rating: 0, // Example: Calculate or fetch rating dynamically
+        };
+        break;
+
+      case "manager":
+        const manager = await Manager.findById(userId);
+        if (!manager) {
+          return res.status(404).json({ errorMessage: "Manager not found" });
+        }
+        profileData = {
+          userName: manager.userName,
+          email: manager.email,
+          branch: manager.branch,
+          assignedTasks: 0, // Example: Fetch count of assigned tasks dynamically
+          accountStatus: "Active",
+          createdAt: manager.createdAt,
+        };
+
+        console.log(profileData);
+        break;
+
+      // Add more cases for other roles like 'mechanic', 'owner', etc.
+      default:
+        return res.status(400).json({ errorMessage: "Invalid role" });
     }
 
-    // Return all the required profile information
-    const userProfile = {
-      userName: user.userName,
-      email: user.email,
-      dateOfBirth: user.dateOfBirth,
-      role: user.role,
-      createdAt: user.createdAt,
-      // Add these fields to your User schema if they don't exist
-      rentalCount: 0, // You can update this based on your rental tracking logic
-      accountStatus: "Active", // You can make this dynamic based on user status
-      rating: 0 // You can implement a rating system later
-    };
-
-    res.status(200).json(userProfile);
+    res.status(200).json(profileData);
   } catch (err) {
-    console.error("Error fetching profile:", err);
+    console.error(`Error fetching ${role} profile:`, err);
     res.status(500).json({ errorMessage: "Error fetching profile data" });
   }
 });
@@ -250,11 +329,11 @@ app.put("/profile/update", async (req, res) => {
 
   try {
     const updates = req.body;
-    const allowedUpdates = ['userName', 'dateOfBirth']; // Add other fields that should be updatable
-    
+    const allowedUpdates = ["userName", "dateOfBirth"]; // Add other fields that should be updatable
+
     // Filter out any fields that shouldn't be updateable
     const filteredUpdates = Object.keys(updates)
-      .filter(key => allowedUpdates.includes(key))
+      .filter((key) => allowedUpdates.includes(key))
       .reduce((obj, key) => {
         obj[key] = updates[key];
         return obj;
@@ -277,15 +356,14 @@ app.put("/profile/update", async (req, res) => {
         email: updatedUser.email,
         dateOfBirth: updatedUser.dateOfBirth,
         role: updatedUser.role,
-        createdAt: updatedUser.createdAt
-      }
+        createdAt: updatedUser.createdAt,
+      },
     });
   } catch (err) {
     console.error("Error updating profile:", err);
     res.status(500).json({ errorMessage: "Error updating profile" });
   }
 });
-
 
 // Add a new car
 app.post("/api/cars", async (req, res) => {
@@ -302,11 +380,9 @@ app.post("/api/cars", async (req, res) => {
 // Update a car
 app.put("/api/cars/:id", async (req, res) => {
   try {
-    const updatedCar = await Car.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
+    const updatedCar = await Car.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
     if (!updatedCar) {
       return res.status(404).json({ errorMessage: "Car not found" });
     }
@@ -331,21 +407,61 @@ app.delete("/api/cars/:id", async (req, res) => {
   }
 });
 
-
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
+  res.clearCookie("id");
+  res.clearCookie("role");
   res.status(200).json({ message: "Logged out successfully" });
 });
 
-app.get("/profile", (req, res) => {
-  const userId = req.cookies.user_id;
+app.get("/profile", async (req, res) => {
+  const role = req.cookies.role; // Use role from cookies
+  const userId = req.cookies.id; // Use id from cookies
 
-  if (!userId) {
+  if (!role || !userId) {
     return res.status(401).json({ errorMessage: "Not authenticated" });
   }
 
-  res.status(200).json({ message: "User is authenticated", userId });
+  try {
+    let profileData;
+
+    switch (role) {
+      case "user":
+        const user = await User.findById(userId);
+        if (!user) {
+          return res.status(404).json({ errorMessage: "User not found" });
+        }
+        profileData = {
+          userName: user.userName,
+          email: user.email,
+          dateOfBirth: user.dateOfBirth,
+          createdAt: user.createdAt,
+        };
+        break;
+
+      case "manager":
+        const manager = await Manager.findById(userId);
+        if (!manager) {
+          return res.status(404).json({ errorMessage: "Manager not found" });
+        }
+        profileData = {
+          userName: manager.userName,
+          email: manager.email,
+          branch: manager.branch,
+          createdAt: manager.createdAt,
+        };
+        break;
+
+      default:
+        return res.status(400).json({ errorMessage: "Invalid role" });
+    }
+
+    res.status(200).json(profileData);
+  } catch (err) {
+    console.error("Error fetching profile:", err);
+    res.status(500).json({ errorMessage: "Error fetching profile data" });
+  }
 });
+
 
 const PORT = 3001;
 app.listen(PORT, () => {

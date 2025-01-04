@@ -25,18 +25,34 @@ const NavBar = () => {
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
   const toggleProfileDropdown = () => setIsProfileDropdownOpen((prev) => !prev);
 
-  const logout = () => {
-    // Clear localStorage
-    localStorage.removeItem('token');
-    localStorage.removeItem('userType');
-    
-    // Update the state to reflect the user is logged out
-    setIsLoggedIn(false);
-    setIsProfileDropdownOpen(false);
-    
-    // Redirect to home page
-    window.location.href = '/';
+  const logout = async () => {
+    try {
+      // Call the backend to clear cookies
+      const response = await fetch("http://localhost:3001/logout", {
+        method: "POST",
+        credentials: "include", // Ensure cookies are sent with the request
+      });
+  
+      if (response.ok) {
+        // Clear localStorage
+        localStorage.removeItem("token");
+        localStorage.removeItem("userType");
+  
+        // Update the state to reflect the user is logged out
+        setIsLoggedIn(false);
+        setIsProfileDropdownOpen(false);
+  
+        // Redirect to home page or login page
+        window.location.href = "/";
+      } else {
+        const errorData = await response.json();
+        console.error("Logout failed:", errorData.errorMessage);
+      }
+    } catch (err) {
+      console.error("Error logging out:", err.message);
+    }
   };
+  
 
   return (
     <nav className="bg-black px-4 py-3 relative border-b border-gray-700">

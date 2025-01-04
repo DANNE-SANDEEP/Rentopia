@@ -215,6 +215,7 @@ const AdminDashboard = () => {
     setIsLoading(true);
     try {
       await axios.post("http://localhost:3001/api/managers", {
+        userName: newManager.userName,
         email: newManager.email,
         branch: newManager.branch,
         password: newManager.password,
@@ -227,6 +228,7 @@ const AdminDashboard = () => {
       setAlertMessage("Manager added successfully");
       setShowAddManagerForm(false);
       setNewManager({
+        userName: "",
         email: "",
         branch: "",
         password: "",
@@ -376,6 +378,7 @@ const AdminDashboard = () => {
             <thead>
               <tr className="text-left bg-gray-50">
                 <th className="p-4">Email</th>
+                <th className="p-4">Username</th>
                 <th className="p-4">Branch</th>
                 <th className="p-4">Mechanics</th>
                 <th className="p-4">Completed Tasks</th>
@@ -392,6 +395,7 @@ const AdminDashboard = () => {
                 .map((manager) => (
                   <tr key={manager._id} className="border-t">
                     <td className="p-4">{manager.email}</td>
+                    <td className="p-4">{manager.userName}</td>
                     <td className="p-4">{manager.branch}</td>
                     <td className="p-4">{manager.mechanics}</td>
                     <td className="p-4">{manager.completedTasks}</td>
@@ -548,6 +552,23 @@ const AdminDashboard = () => {
               <h3 className="text-xl font-bold mb-4">Add New Manager</h3>
               <form onSubmit={handleAddManager} className="space-y-4">
                 {/* Email Field */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    User Name:
+                  </label>
+                  <input
+                    type="text"
+                    value={newManager.userName}
+                    onChange={(e) =>
+                      setNewManager({
+                        ...newManager,
+                        userName: e.target.value,
+                      })
+                    }
+                    className="w-full px-4 py-2 border rounded-lg"
+                    placeholder="Enter Username"
+                  />
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
                     Email

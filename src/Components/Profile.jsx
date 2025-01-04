@@ -1,14 +1,6 @@
 import React, { useState, useEffect } from "react";
-import {
-  User,
-  Mail,
-  Calendar,
-  Shield,
-  Car,
-  Star,
-  Edit,
-  Camera,
-} from "lucide-react";
+import { User, Mail, Calendar, Shield, Car, Star, Camera } from "lucide-react";
+import Cookies from "js-cookie";
 import Loader from "../Components/Loader";
 import proimage from "../assets/images/profile.png";
 
@@ -66,10 +58,7 @@ const Profile = () => {
   const [userProfile, setUserProfile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedData, setEditedData] = useState({});
-  const [editError, setEditError] = useState(null);
-
+  const [role, setRole] = useState("");
   useEffect(() => {
     fetchUserProfile();
   }, []);
@@ -82,82 +71,42 @@ const Profile = () => {
 
   const fetchUserProfile = async () => {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        window.location.href = "/auth";
-        return;
-      }
+      const role = Cookies.get("role");
+      const id = Cookies.get("id");
+
+      console.log("Role:", role); // Ensure role is printed here
+      console.log("ID:", id); // Ensure ID is printed here
 
       const response = await fetch("http://localhost:3001/profile", {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         credentials: "include",
       });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch profile");
+        const errorData = await response.json();
+        throw new Error(errorData.errorMessage || "Failed to fetch profile");
       }
 
       const data = await response.json();
-      setUserProfile(data);
+
+      // Print user or manager data in the console
+      if (role === "user") {
+        console.log("User Profile:", data);
+      } else if (role === "manager") {
+        console.log("Manager Profile:", data);
+      }
+      setRole(role);
+
+      setUserProfile(data); // Update the profile state
     } catch (err) {
+      console.error("Error fetching profile:", err.message);
       setError(err.message);
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleEdit = (field) => {
-    setIsEditing(true);
-    setEditedData({ ...editedData, [field]: userProfile[field] });
-    setEditError(null);
-  };
-
-  const handleSave = async (field) => {
-    try {
-      if (!editedData[field] || editedData[field].trim() === "") {
-        setEditError("Username cannot be empty");
-        return;
-      }
-
-      setEditError(null);
-      const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:3001/profile/update", {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ [field]: editedData[field] }),
-        credentials: "include",
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setUserProfile({ ...userProfile, [field]: editedData[field] });
-        setIsEditing(false);
-        setEditedData({});
-      } else {
-        if (data.error === "USERNAME_EXISTS") {
-          setEditError("Username already exists. Please try another one.");
-        } else {
-          setEditError(data.message || "Failed to update username.");
-        }
-      }
-    } catch (err) {
-      setEditError("An error occurred while updating the username.");
-      console.error("Error updating profile:", err);
-    }
-  };
-
-  const handleCancel = () => {
-    setIsEditing(false);
-    setEditedData({});
-    setEditError(null);
   };
 
   if (error) {
@@ -272,56 +221,11 @@ const Profile = () => {
                   <User className="text-gray-400 mt-1" size={20} />
                   <div className="flex-1">
                     <p className="text-sm text-gray-500">Username</p>
-                    {isEditing && editedData.hasOwnProperty("userName") ? (
-                      <input
-                        type="text"
-                        value={editedData.userName}
-                        onChange={(e) =>
-                          setEditedData({
-                            ...editedData,
-                            userName: e.target.value,
-                          })
-                        }
-                        className="w-full p-2 border rounded mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Enter new username"
-                      />
-                    ) : (
-                      <p className="font-medium text-gray-700">
-                        {userProfile.userName}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex gap-2">
-                    {isEditing && editedData.hasOwnProperty("userName") ? (
-                      <>
-                        <button
-                          onClick={() => handleSave("userName")}
-                          className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition-colors duration-200"
-                        >
-                          Save
-                        </button>
-                        <button
-                          onClick={handleCancel}
-                          className="px-3 py-1 bg-gray-200 text-gray-600 rounded hover:bg-gray-300 transition-colors duration-200"
-                        >
-                          Cancel
-                        </button>
-                      </>
-                    ) : (
-                      <button
-                        onClick={() => handleEdit("userName")}
-                        className="text-gray-400 hover:text-gray-600 transition-colors duration-200"
-                      >
-                        <Edit size={16} />
-                      </button>
-                    )}
+                    <p className="font-medium text-gray-700">
+                      {userProfile.userName}
+                    </p>
                   </div>
                 </div>
-                {editError && (
-                  <div className="mt-2 p-3 bg-red-100 border border-red-400 text-red-700 rounded animate-fade-in">
-                    {editError}
-                  </div>
-                )}
               </div>
 
               {/* Email */}
@@ -336,15 +240,18 @@ const Profile = () => {
               </div>
 
               {/* Date of Birth */}
-              <div className="flex items-start gap-4">
-                <Calendar className="text-gray-400 mt-1" size={20} />
-                <div className="flex-1">
-                  <p className="text-sm text-gray-500">Date of Birth</p>
-                  <p className="font-medium text-gray-700">
-                    {new Date(userProfile.dateOfBirth).toLocaleDateString()}
-                  </p>
+
+              {role === "user" && (
+                <div className="flex items-start gap-4">
+                  <Calendar className="text-gray-400 mt-1" size={20} />
+                  <div className="flex-1">
+                    <p className="text-sm text-gray-500">Date of Birth</p>
+                    <p className="font-medium text-gray-700">
+                      {new Date(userProfile.dateOfBirth).toLocaleDateString()}
+                    </p>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Account Created */}
               <div className="flex items-start gap-4">
@@ -362,9 +269,7 @@ const Profile = () => {
                 <Shield className="text-gray-400 mt-1" size={20} />
                 <div className="flex-1">
                   <p className="text-sm text-gray-500">Account Type</p>
-                  <p className="font-medium text-gray-700 capitalize">
-                    {userProfile.role}
-                  </p>
+                  <p className="font-medium text-gray-700 capitalize">{role}</p>
                 </div>
               </div>
             </div>

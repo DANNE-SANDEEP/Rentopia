@@ -55,42 +55,44 @@ const Auth = () => {
     e.preventDefault();
     setMessage("");
     setError(false);
-
+  
     if (!formData.email || !formData.password) {
       setError(true);
       setMessage("Please fill in both email and password.");
       return;
     }
-
+  
     try {
       // First try manager login
-      const managerResponse = await fetch(
-        "http://localhost:3001/manager/login",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: formData.email,
-            password: formData.password,
-          }),
-          credentials: "include",
-        }
-      );
-
+      const managerResponse = await fetch("http://localhost:3001/manager/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+        credentials: "include",
+      });
+  
       if (managerResponse.ok) {
-        const data = await managerResponse.json();
+        const managerData = await managerResponse.json();
         setMessage("Login successful! Redirecting to manager dashboard...");
         setError(false);
-        localStorage.setItem("token", data.token);
+        localStorage.setItem("token", managerData.token);
         localStorage.setItem("userType", "manager");
-
+  
         setTimeout(() => {
           window.location.href = "/mdashboard";
         }, 1500);
         return;
+      } else {
+        // If manager login fails, proceed to user login
+        const managerData = await managerResponse.json();
+        setError(true);
+        setMessage(managerData.errorMessage || "Manager login failed.");
       }
-
-      // If manager login fails, try user login
+  
+      // Try user login if manager login fails
       const userResponse = await fetch("http://localhost:3001/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -100,15 +102,15 @@ const Auth = () => {
         }),
         credentials: "include",
       });
-
+  
       const userData = await userResponse.json();
-
+  
       if (userResponse.ok) {
         setMessage("Login successful! Redirecting to home page...");
         setError(false);
         localStorage.setItem("token", userData.token);
         localStorage.setItem("userType", "user");
-
+  
         setTimeout(() => {
           window.location.href = "/";
         }, 1500);
@@ -122,6 +124,9 @@ const Auth = () => {
       console.error(err);
     }
   };
+  
+  
+  
 
   const handleBack = () => {
     setSignupStep(1);
