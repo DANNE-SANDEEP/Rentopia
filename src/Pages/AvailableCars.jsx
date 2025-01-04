@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Search, 
   Filter, 
@@ -13,6 +13,7 @@ import {
   Gauge,
   SlidersHorizontal
 } from 'lucide-react';
+import Loader from '../Components/Loader';
 
 const AvailableCars = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -20,6 +21,15 @@ const AvailableCars = () => {
   const [selectedShop, setSelectedShop] = useState('all');
   const [priceRange, setPriceRange] = useState('all');
   const [isFiltersVisible, setIsFiltersVisible] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Add this effect to simulate initial loading
+  useEffect(() => {
+    // Simulate loading time
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 2000); // Show loader for 2 seconds
+  }, []);
 
   const cars = [
     {
@@ -95,6 +105,11 @@ const AvailableCars = () => {
   };
 
   const filteredCars = filterCars(cars);
+
+  // Add this at the very beginning of your return statement
+  if (isLoading) {
+    return <Loader />;
+  }
 
   return (
     <div className=" min-h-screen max-w-[1480px] mx-auto text-gray-800 p-4">

@@ -6,6 +6,7 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const User = require("./models/userSchema");
 const Contact = require('./models/contactSchema');
+const Manager = require('./models/managerSchema');
 
 const app = express();
 
@@ -21,7 +22,90 @@ mongoose
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error("MongoDB connection error:", err));
 
-// Added Contact Routes
+// Manager Routes
+app.get("/api/managers", async (req, res) => {
+  try {
+    const managers = await Manager.find();
+    res.json(managers);
+  } catch (error) {
+    console.error("Error fetching managers:", error);
+    res.status(500).json({ errorMessage: "Error fetching managers" });
+  }
+});
+
+app.post("/manager/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const manager = await Manager.findOne({ email });
+    if (!manager) {
+      return res.status(404).json({ errorMessage: "Manager not found" });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, manager.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ errorMessage: "Invalid credentials" });
+    }
+
+    res.cookie("manager_id", manager._id, {
+      httpOnly: true,
+      secure: false, // Set to true in production with HTTPS
+      maxAge: 3600000, // 1 hour
+    });
+
+    res.status(200).json({ 
+      message: "Login successful",
+      managerId: manager._id,
+      branch: manager.branch 
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ errorMessage: "Internal server error" });
+  }
+});
+
+app.post("/api/managers", async (req, res) => {
+  try {
+    const { email, branch, password } = req.body;
+    
+    // Check if manager already exists
+    const existingManager = await Manager.findOne({ email });
+    if (existingManager) {
+      return res.status(400).json({ errorMessage: "Manager with this email already exists" });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create new manager
+    const newManager = new Manager({
+      email,
+      branch,
+      password: hashedPassword,
+      mechanics: 0,
+      completedTasks: 0,
+      rating: 0
+    });
+
+    await newManager.save();
+    res.status(201).json({ message: "Manager added successfully" });
+  } catch (error) {
+    console.error("Error adding manager:", error);
+    res.status(500).json({ errorMessage: "Error adding manager" });
+  }
+});
+
+app.delete("/api/managers/:id", async (req, res) => {
+  try {
+    await Manager.findByIdAndDelete(req.params.id);
+    res.json({ message: "Manager deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting manager:", error);
+    res.status(500).json({ errorMessage: "Error deleting manager" });
+  }
+});
+
+// Contact Routes
 app.get("/api/contacts", async (req, res) => {
   try {
     const contacts = await Contact.find().sort({ submittedAt: -1 });
@@ -40,7 +124,7 @@ app.delete("/api/contacts/:id", async (req, res) => {
   }
 });
 
-// Existing Routes
+// User Routes
 app.post("/signup", async (req, res) => {
   const { email, userName, dateOfBirth, password } = req.body;
   console.log('Incoming data:', req.body);

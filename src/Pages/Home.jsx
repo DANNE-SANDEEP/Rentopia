@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Car, Bike, Calendar, MapPin, Clock } from 'lucide-react';
 import Lottie from 'lottie-react';
 import carAnimation from '../assets/lottie/car-animation.json';
+import Loader from '../Components/Loader';
 
 const Home = () => {
   const [showCalendar, setShowCalendar] = useState(false);
@@ -9,6 +10,15 @@ const Home = () => {
   const [selectedDate, setSelectedDate] = useState('Today');
   const [selectedTime, setSelectedTime] = useState('Now');
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Add this effect to simulate initial loading
+  useEffect(() => {
+    // Simulate loading time
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 2000); // Show loader for 2 seconds
+  }, []);
 
   // Calendar helpers
   const daysInMonth = (date) => {
@@ -33,6 +43,11 @@ const Home = () => {
     }
     return slots;
   };
+
+  // Add this at the very beginning of your return statement
+  if (isLoading) {
+    return <Loader />;
+  }
 
   return (
     <section className="min-h-screen max-w-[1570px] mx-auto">

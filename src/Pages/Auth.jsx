@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowRight } from "lucide-react";
+import Loader from '../Components/Loader';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -13,6 +14,24 @@ const Auth = () => {
   });
   const [message, setMessage] = useState("");
   const [error, setError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Add this effect to simulate initial loading
+  useEffect(() => {
+    // Simulate loading time
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 2000); // Show loader for 2 seconds
+  }, []);
+
+  // Add useEffect to check authentication status
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      // If user is already logged in, redirect to home page
+      window.location.href = '/';
+    }
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -44,30 +63,58 @@ const Auth = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:3001/login", {
+      // First try manager login
+      const managerResponse = await fetch(
+        "http://localhost:3001/manager/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password,
+          }),
+          credentials: "include",
+        }
+      );
+
+      if (managerResponse.ok) {
+        const data = await managerResponse.json();
+        setMessage("Login successful! Redirecting to manager dashboard...");
+        setError(false);
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("userType", "manager");
+
+        setTimeout(() => {
+          window.location.href = "/mdashboard";
+        }, 1500);
+        return;
+      }
+
+      // If manager login fails, try user login
+      const userResponse = await fetch("http://localhost:3001/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: formData.email,
           password: formData.password,
         }),
+        credentials: "include",
       });
 
-      const data = await response.json();
+      const userData = await userResponse.json();
 
-      if (!response.ok) {
-        setError(true);
-        setMessage(data.errorMessage || "Login failed. Please try again.");
-      } else {
-        setMessage("Login successful!");
+      if (userResponse.ok) {
+        setMessage("Login successful! Redirecting to home page...");
         setError(false);
+        localStorage.setItem("token", userData.token);
+        localStorage.setItem("userType", "user");
 
-        localStorage.setItem("token", data.token); // Save JWT token
-
-        // Redirect using React Router if applicable
         setTimeout(() => {
           window.location.href = "/";
-        }, 1000);
+        }, 1500);
+      } else {
+        setError(true);
+        setMessage(userData.errorMessage || "Invalid email or password.");
       }
     } catch (err) {
       setError(true);
@@ -138,6 +185,11 @@ const Auth = () => {
       console.error(err);
     }
   };
+
+   // Add this at the very beginning of your return statement
+   if (isLoading) {
+    return <Loader />;
+  }
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-4">

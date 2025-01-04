@@ -8,27 +8,35 @@ const NavBar = () => {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
 
   const checkLoginStatus = () => {
-    const cookies = document.cookie.split('; ');
-    const userCookie = cookies.find((row) => row.startsWith('user_id='));
-    setIsLoggedIn(!!userCookie);
+    const token = localStorage.getItem('token');
+    setIsLoggedIn(!!token);
   };
 
   useEffect(() => {
     checkLoginStatus();
+    // Add event listener for storage changes
+    window.addEventListener('storage', checkLoginStatus);
+    
+    return () => {
+      window.removeEventListener('storage', checkLoginStatus);
+    };
   }, []);
 
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
   const toggleProfileDropdown = () => setIsProfileDropdownOpen((prev) => !prev);
 
   const logout = () => {
-    // Clear the user_id cookie by setting it to an expired date
-    document.cookie = 'user_id=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
-  
+    // Clear localStorage
+    localStorage.removeItem('token');
+    localStorage.removeItem('userType');
+    
     // Update the state to reflect the user is logged out
     setIsLoggedIn(false);
     setIsProfileDropdownOpen(false);
+    
+    // Redirect to home page
+    window.location.href = '/';
   };
-  
 
   return (
     <nav className="bg-black px-4 py-3 relative border-b border-gray-700">

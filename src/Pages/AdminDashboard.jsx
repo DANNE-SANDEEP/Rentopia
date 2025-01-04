@@ -23,6 +23,7 @@ import {
   MessageCircle,
 } from "lucide-react";
 import axios from "axios";
+import Loader from '../Components/Loader';
 
 const Alert = ({ children, className }) => (
   <div className={`p-4 rounded-lg ${className}`}>{children}</div>
@@ -107,13 +108,27 @@ const AdminDashboard = () => {
   const [alertMessage, setAlertMessage] = useState("");
   const [showMessages, setShowMessages] = useState(false);
   const [messageCount, setMessageCount] = useState(0);
+  const [managers, setManagers] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [totalManagers, setTotalManagers] = useState(0);
+
+  
+  // Add this effect to simulate initial loading
+  useEffect(() => {
+    // Simulate loading time
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 2000); // Show loader for 2 seconds
+  }, []);
 
   const [newManager, setNewManager] = useState({
-    name: "",
     email: "",
-    phone: "",
     branch: "",
-    experience: "",
+    password: "",
+    reEnterPassword: "",
+    mechanics: 0,
+    completedTasks: 0,
+    rating: 0,
   });
 
   const revenueData = [
@@ -121,25 +136,6 @@ const AdminDashboard = () => {
     { name: "Week 2", weekly: 18000, monthly: 72000, yearly: 820000 },
     { name: "Week 3", weekly: 16500, monthly: 68000, yearly: 795000 },
     { name: "Week 4", weekly: 19000, monthly: 75000, yearly: 850000 },
-  ];
-
-  const managers = [
-    {
-      id: 1,
-      name: "John Smith",
-      branch: "Downtown",
-      mechanics: 8,
-      completedTasks: 145,
-      rating: 4.7,
-    },
-    {
-      id: 2,
-      name: "Emily Brown",
-      branch: "Westside",
-      mechanics: 6,
-      completedTasks: 120,
-      rating: 4.8,
-    },
   ];
 
   const recentActivities = [
@@ -175,17 +171,77 @@ const AdminDashboard = () => {
     { id: 3, task: "Brake Replacement", priority: "High", deadline: "Today" },
   ];
 
-  const handleAddManager = (e) => {
+  const handleDeleteManager = async (id) => {
+    setIsLoading(true);
+    try {
+      await axios.delete(`http://localhost:3001/api/managers/${id}`);
+      await fetchManagers(); // Wait for the managers to be fetched
+      setAlertMessage("Manager deleted successfully");
+      setTimeout(() => setAlertMessage(""), 3000);
+    } catch (error) {
+      console.error("Failed to delete manager:", error);
+      setAlertMessage("Failed to delete manager");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchManagers = async () => {
+    setIsLoading(true);
+    try {
+      const response = await axios.get("http://localhost:3001/api/managers");
+      setManagers(response.data);
+      setTotalManagers(response.data.length); // Set the total count
+    } catch (error) {
+      console.error("Failed to fetch managers:", error);
+      setAlertMessage("Failed to fetch managers");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchManagers();
+  }, []);
+
+  const handleAddManager = async (e) => {
     e.preventDefault();
-    setAlertMessage("Manager added successfully");
-    setShowAddManagerForm(false);
-    setNewManager({
-      name: "",
-      email: "",
-      phone: "",
-      branch: "",
-      experience: "",
-    });
+
+    if (newManager.password !== newManager.reEnterPassword) {
+      setAlertMessage("Passwords do not match!");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await axios.post("http://localhost:3001/api/managers", {
+        email: newManager.email,
+        branch: newManager.branch,
+        password: newManager.password,
+        mechanics: 0,
+        completedTasks: 0,
+        rating: 0,
+      });
+
+      await fetchManagers(); // Wait for the managers to be fetched
+      setAlertMessage("Manager added successfully");
+      setShowAddManagerForm(false);
+      setNewManager({
+        email: "",
+        branch: "",
+        password: "",
+        reEnterPassword: "",
+        mechanics: 0,
+        completedTasks: 0,
+        rating: 0,
+      });
+    } catch (error) {
+      console.error("Failed to add manager:", error);
+      setAlertMessage("Failed to add manager");
+    } finally {
+      setIsLoading(false);
+    }
+
     setTimeout(() => setAlertMessage(""), 3000);
   };
 
@@ -308,36 +364,52 @@ const AdminDashboard = () => {
         </button>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="text-left bg-gray-50">
-              <th className="p-4">Name</th>
-              <th className="p-4">Branch</th>
-              <th className="p-4">Mechanics</th>
-              <th className="p-4">Completed Tasks</th>
-              <th className="p-4">Rating</th>
-              <th className="p-4">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {managers.map((manager) => (
-              <tr key={manager.id} className="border-t">
-                <td className="p-4">{manager.name}</td>
-                <td className="p-4">{manager.branch}</td>
-                <td className="p-4">{manager.mechanics}</td>
-                <td className="p-4">{manager.completedTasks}</td>
-                <td className="p-4">{manager.rating} / 5.0</td>
-                <td className="p-4">
-                  <button className="p-2 text-red-600 hover:bg-red-50 rounded-full">
-                    <Trash2 className="w-5 h-5" />
-                  </button>
-                </td>
+      {managers.length === 0 ? (
+        <div className="text-center py-8">
+          <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-500 text-lg">No managers found</p>
+          <p className="text-gray-400 mt-2">Click the 'Add Manager' button to add a new manager</p>
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="text-left bg-gray-50">
+                <th className="p-4">Email</th>
+                <th className="p-4">Branch</th>
+                <th className="p-4">Mechanics</th>
+                <th className="p-4">Completed Tasks</th>
+                <th className="p-4">Rating</th>
+                <th className="p-4">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {managers
+                .filter(manager => 
+                  manager.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                  manager.branch.toLowerCase().includes(searchTerm.toLowerCase())
+                )
+                .map((manager) => (
+                  <tr key={manager._id} className="border-t">
+                    <td className="p-4">{manager.email}</td>
+                    <td className="p-4">{manager.branch}</td>
+                    <td className="p-4">{manager.mechanics}</td>
+                    <td className="p-4">{manager.completedTasks}</td>
+                    <td className="p-4">{manager.rating.toFixed(1)} / 5.0</td>
+                    <td className="p-4">
+                      <button 
+                        className="p-2 text-red-600 hover:bg-red-50 rounded-full"
+                        onClick={() => handleDeleteManager(manager._id)}
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 
@@ -384,6 +456,11 @@ const AdminDashboard = () => {
     </div>
   );
 
+  // Add this at the very beginning of your return statement
+  if (isLoading) {
+    return <Loader />;
+  }
+
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="p-6 max-w-[1440px] mx-auto">
@@ -420,7 +497,7 @@ const AdminDashboard = () => {
           <div className="bg-white p-6 rounded-lg shadow-sm">
             <Users className="w-6 h-6 text-blue-600 mb-2" />
             <p className="text-gray-600">Total Managers</p>
-            <p className="text-2xl font-bold">8</p>
+            <p className="text-2xl font-bold">{totalManagers}</p>
           </div>
           <div className="bg-white p-6 rounded-lg shadow-sm">
             <Settings className="w-6 h-6 text-orange-600 mb-2" />
@@ -470,25 +547,82 @@ const AdminDashboard = () => {
             <div className="bg-white p-6 rounded-lg w-full max-w-md">
               <h3 className="text-xl font-bold mb-4">Add New Manager</h3>
               <form onSubmit={handleAddManager} className="space-y-4">
-                {Object.keys(newManager).map((field) => (
-                  <div key={field}>
-                    <label className="block text-sm font-medium text-gray-700 capitalize">
-                      {field}
-                    </label>
-                    <input
-                      type={field === "email" ? "email" : "text"}
-                      value={newManager[field]}
-                      onChange={(e) =>
-                        setNewManager({
-                          ...newManager,
-                          [field]: e.target.value,
-                        })
-                      }
-                      className="w-full px-4 py-2 border rounded-lg"
-                      placeholder={`Enter ${field}`}
-                    />
-                  </div>
-                ))}
+                {/* Email Field */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={newManager.email}
+                    onChange={(e) =>
+                      setNewManager({
+                        ...newManager,
+                        email: e.target.value,
+                      })
+                    }
+                    className="w-full px-4 py-2 border rounded-lg"
+                    placeholder="Enter email"
+                  />
+                </div>
+                {/* Branch Field */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Branch
+                  </label>
+                  <input
+                    type="text"
+                    value={newManager.branch}
+                    onChange={(e) =>
+                      setNewManager({
+                        ...newManager,
+                        branch: e.target.value,
+                      })
+                    }
+                    className="w-full px-4 py-2 border rounded-lg"
+                    placeholder="Enter branch"
+                  />
+                </div>
+
+                {/* Password Field */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    value={newManager.password}
+                    onChange={(e) =>
+                      setNewManager({
+                        ...newManager,
+                        password: e.target.value,
+                      })
+                    }
+                    className="w-full px-4 py-2 border rounded-lg"
+                    placeholder="Enter password"
+                  />
+                </div>
+
+                {/* Re-enter Password Field */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Re-enter Password
+                  </label>
+                  <input
+                    type="password"
+                    value={newManager.reEnterPassword}
+                    onChange={(e) =>
+                      setNewManager({
+                        ...newManager,
+                        reEnterPassword: e.target.value,
+                      })
+                    }
+                    className="w-full px-4 py-2 border rounded-lg"
+                    placeholder="Re-enter password"
+                  />
+                </div>
+
+                {/* Buttons */}
                 <div className="flex justify-end space-x-4">
                   <button
                     type="button"

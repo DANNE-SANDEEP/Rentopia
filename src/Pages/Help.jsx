@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import Lottie from "lottie-react";
 import contactAnimation from "../assets/lottie/contact-animation.json";
+import Loader from '../Components/Loader';
 
 const Help = () => {
   const [expandedCategory, setExpandedCategory] = useState(null);
@@ -26,6 +27,15 @@ const Help = () => {
     status: 'idle',
     message: 'Send Message'
   });
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Add this effect to simulate initial loading
+  useEffect(() => {
+    // Simulate loading time
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 2000); // Show loader for 2 seconds
+  }, []);
 
   useEffect(() => {
     if (submitStatus.status === 'success' || submitStatus.status === 'error') {
@@ -193,6 +203,10 @@ const Help = () => {
     },
   ];
 
+  // Add this at the very beginning of your return statement
+  if (isLoading) {
+    return <Loader />;
+  }
   return (
     <section className="min-h-screen max-w-[1570px] mx-auto p-8 lg:p-16">
       <h1 className="text-5xl mb-12">
@@ -214,11 +228,11 @@ const Help = () => {
           <div className="flex gap-6 mb-8">
             <div className="flex items-center gap-3">
               <Phone className="text-gray-500" />
-              <span>+1 234 567 8900</span>
+              <span>+91 8121744089</span>
             </div>
             <div className="flex items-center gap-3">
               <Mail className="text-gray-500" />
-              <span>support@rental.com</span>
+              <span>support.rentopia@co.in</span>
             </div>
           </div>
 
