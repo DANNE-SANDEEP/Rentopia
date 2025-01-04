@@ -1,0 +1,72 @@
+[
+  {
+    "name": "Toyota Corolla",
+    "type": "Sedan",
+    "year": 2022,
+    "price": 50,
+    "location": "New York, NY",
+    "shop": "City Auto Rentals",
+    "features": [
+      "Air Conditioning",
+      "Bluetooth",
+      "Backup Camera",
+      "Navigation System"
+    ],
+    "image": "https://example.com/toyota-corolla.jpg"
+  },
+  {
+    "name": "Honda Civic",
+    "type": "Sedan",
+    "year": 2021,
+    "price": 60,
+    "location": "Los Angeles, CA",
+    "shop": "Elite Car Rentals",
+    "features": ["Cruise Control", "Sunroof", "Heated Seats"],
+    "image": "https://example.com/honda-civic.jpg"
+  },
+  {
+    "name": "Ford Mustang",
+    "type": "Sports",
+    "year": 2020,
+    "price": 100,
+    "location": "Chicago, IL",
+    "shop": "Performance Cars",
+    "features": ["Leather Seats", "Bluetooth", "Heated Seats", "Sport Mode"],
+    "image": "https://example.com/ford-mustang.jpg"
+  },
+  {
+    "name": "Chevrolet Camaro",
+    "type": "Sports",
+    "year": 2023,
+    "price": 120,
+    "location": "Miami, FL",
+    "shop": "Luxury Car Rentals",
+    "features": ["Leather Seats", "Touchscreen", "Bose Sound System"],
+    "image": "https://example.com/chevrolet-camaro.jpg"
+  },
+  {
+    "name": "BMW X5",
+    "type": "SUV",
+    "year": 2022,
+    "price": 150,
+    "location": "San Francisco, CA",
+    "shop": "Luxury Car Rentals",
+    "features": [
+      "All-Wheel Drive",
+      "Panoramic Sunroof",
+      "Navigation System",
+      "Parking Sensors"
+    ],
+    "image": "https://example.com/bmw-x5.jpg"
+  },
+  {
+    "name": "Tesla Model 3",
+    "type": "Electric",
+    "year": 2021,
+    "price": 200,
+    "location": "Los Angeles, CA",
+    "shop": "Electric Car Rentals",
+    "features": ["Autopilot", "Electric", "Heated Seats", "Touchscreen"],
+    "image": "https://example.com/tesla-model3.jpg"
+  }
+]

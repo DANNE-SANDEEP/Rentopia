@@ -7,7 +7,7 @@ const cors = require("cors");
 const User = require("./models/userSchema");
 const Contact = require('./models/contactSchema');
 const Manager = require('./models/managerSchema');
-
+const Car = require('./models/availableCarsSchema');
 const app = express();
 
 app.use(cors({ origin: "http://localhost:3000", credentials: true }));
@@ -19,7 +19,7 @@ mongoose
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
-  .then(() => console.log("Connected to MongoDB"))
+  .then(() => console.log("✅ Connected to MongoDB"))
   .catch((err) => console.error("MongoDB connection error:", err));
 
 // Manager Routes
@@ -195,6 +195,61 @@ app.post("/login", async (req, res) => {
   }
 });
 
+app.get("/api/cars", async (req, res) => {
+  try {
+    const cars = await Car.find();
+    res.json(cars);
+  } catch (error) {
+    console.error("Error fetching cars:", error);
+    res.status(500).json({ errorMessage: "Error fetching cars" });
+  }
+});
+
+// Add a new car
+app.post("/api/cars", async (req, res) => {
+  try {
+    const newCar = new Car(req.body);
+    await newCar.save();
+    res.status(201).json({ message: "Car added successfully", car: newCar });
+  } catch (error) {
+    console.error("Error adding car:", error);
+    res.status(500).json({ errorMessage: error.message });
+  }
+});
+
+// Update a car
+app.put("/api/cars/:id", async (req, res) => {
+  try {
+    const updatedCar = await Car.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+    if (!updatedCar) {
+      return res.status(404).json({ errorMessage: "Car not found" });
+    }
+    res.json(updatedCar);
+  } catch (error) {
+    console.error("Error updating car:", error);
+    res.status(500).json({ errorMessage: "Error updating car" });
+  }
+});
+
+// Delete a car
+app.delete("/api/cars/:id", async (req, res) => {
+  try {
+    const deletedCar = await Car.findByIdAndDelete(req.params.id);
+    if (!deletedCar) {
+      return res.status(404).json({ errorMessage: "Car not found" });
+    }
+    res.json({ message: "Car deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting car:", error);
+    res.status(500).json({ errorMessage: "Error deleting car" });
+  }
+});
+
+
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
   res.status(200).json({ message: "Logged out successfully" });
@@ -212,5 +267,5 @@ app.get("/profile", (req, res) => {
 
 const PORT = 3001;
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`🚀 Server is running on http://localhost:${PORT}`);
 });

@@ -22,6 +22,28 @@ const AvailableCars = () => {
   const [priceRange, setPriceRange] = useState('all');
   const [isFiltersVisible, setIsFiltersVisible] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
+  const [cars, setCars] = useState([]);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchCars();
+  }, []);
+
+  const fetchCars = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/api/cars');
+      if (!response.ok) {
+        throw new Error('Failed to fetch cars');
+      }
+      const data = await response.json();
+      setCars(data);
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error fetching cars:', error);
+      setError('Failed to load vehicles. Please try again later.');
+      setIsLoading(false);
+    }
+  };
   
   // Add this effect to simulate initial loading
   useEffect(() => {
@@ -30,64 +52,6 @@ const AvailableCars = () => {
       setIsLoading(false);
     }, 2000); // Show loader for 2 seconds
   }, []);
-
-  const cars = [
-    {
-      id: 1,
-      name: "Toyota Fortuner",
-      type: "SUV",
-      year: 2022,
-      price: 4000,
-      location: "New Milan Shop, Phagwara",
-      shop: "New Milan",
-      features: ["7 Seater", "Diesel", "Automatic"],
-      image: "https://imgs.search.brave.com/KuVDaOniPTByVmct5Ml4Pdjlzl7UW2NFUQ-Ua6DlSAw/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWdj/ZG4ub3RvLmNvbS5z/Zy9sYXJnZS9nYWxs/ZXJ5L2NvbG9yLzEv/MTQvdG95b3RhLWZv/cnR1bmVyLWNvbG9y/LTcyODY0Mi5qcGc"
-    },
-    {
-      id: 2,
-      name: "Mahindra Thar",
-      type: "SUV",
-      year: 2023,
-      price: 3500,
-      location: "Royal Cars, Phagwara",
-      shop: "Royal Cars",
-      features: ["4 Seater", "Diesel", "Manual"],
-      image: "https://imgs.search.brave.com/TzP_t2802cFOOMCyniczMrWnwtdN8mlSPHAyNEqaMUY/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWFn/ZXMuY2FyYW5kYmlr/ZS5jb20vY2FyLWlt/YWdlcy9nYWxsZXJ5/L21haGluZHJhL3Ro/YXIvZXh0ZXJpb3Iv/bWFoaW5kcmEtdGhh/ci5qcGc_dj0yMDI0/LTA3LTA1"
-    },
-    {
-      id: 3,
-      name: "Royal Enfield Classic 350",
-      type: "Bike",
-      year: 2023,
-      price: 1500,
-      location: "Bike Hub, Phagwara",
-      shop: "Bike Hub",
-      features: ["2 Seater", "Petrol", "Manual"],
-      image: "/api/placeholder/400/300"
-    },
-    {
-      id: 4,
-      name: "Honda City",
-      type: "Sedan",
-      year: 2022,
-      price: 2500,
-      location: "New Milan Shop, Phagwara",
-      shop: "New Milan",
-      features: ["5 Seater", "Petrol", "Automatic"],
-      image: "/api/placeholder/400/300"
-    },
-    {
-      id: 5,
-      name: "KTM Duke 250",
-      type: "Bike",
-      year: 2023,
-      price: 1800,
-      location: "Speed Motors, Phagwara",
-      shop: "Speed Motors",
-      features: ["2 Seater", "Petrol", "Manual"],
-      image: "/api/placeholder/400/300"
-    },
-  ];
 
   const filterCars = (cars) => {
     return cars.filter(car => {
@@ -110,7 +74,13 @@ const AvailableCars = () => {
   if (isLoading) {
     return <Loader />;
   }
-
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-red-500 text-xl">{error}</p>
+      </div>
+    );
+  }
   return (
     <div className=" min-h-screen max-w-[1480px] mx-auto text-gray-800 p-4">
       <div className="container mx-auto">
