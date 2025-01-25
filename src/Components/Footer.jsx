@@ -63,7 +63,7 @@ const Footer = () => {
             <h3 className="text-lg font-semibold mb-4">Support</h3>
             <ul className="space-y-2">
               <li>
-                <Link to="/faq" className="text-gray-400 hover:text-white transition-colors">
+                <Link to="/help" className="text-gray-400 hover:text-white transition-colors">
                   FAQ
                 </Link>
               </li>
@@ -99,7 +99,7 @@ const Footer = () => {
               </li>
               <li className="flex items-center text-gray-400">
                 <MapPin size={16} className="mr-2" />
-                <span>123 Rental Street, CA 90210</span>
+                <span>Phagwara, Punjab</span>
               </li>
             </ul>
           </div>

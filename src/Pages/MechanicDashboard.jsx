@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { LineChart, XAxis, YAxis, Tooltip, Line, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { Clock, Star, CheckCircle, DollarSign, Award } from 'lucide-react';
+import { Clock, Star, CheckCircle, Wallet, Award } from 'lucide-react';
 
 const Alert = ({ children, className }) => (
   <div className={`p-4 rounded-lg ${className}`}>
@@ -186,7 +186,7 @@ const MechanicDashboard = () => {
                       </span>
                     </td>
                     <td className="p-4">{request.deadline}</td>
-                    <td className="p-4">${request.estimatedIncome}</td>
+                    <td className="p-4">₹{request.estimatedIncome}</td>
                     <td className="p-4">
                       <span className={`px-2 py-1 rounded-full text-sm ${
                         request.status === 'Pending' ? 'bg-orange-100 text-orange-700' :
@@ -221,7 +221,7 @@ const MechanicDashboard = () => {
                     <td className="p-4">{work.service}</td>
                     <td className="p-4">{work.vehicle}</td>
                     <td className="p-4">{work.completedDate}</td>
-                    <td className="p-4">${work.income}</td>
+                    <td className="p-4">₹{work.income}</td>
                     <td className="p-4">
                       <div className="flex items-center">
                         <Star className="w-4 h-4 text-yellow-500 mr-1" />
@@ -255,9 +255,9 @@ const MechanicDashboard = () => {
             <p className="text-gray-600">Welcome back, John Doe</p>
           </div>
           <div className="bg-white p-4 rounded-lg shadow-sm hover:cursor-pointer">
-            <DollarSign className="w-6 h-6 text-green-600 mb-1" />
+            <Wallet className="w-6 h-6 text-green-600 mb-1" />
             <p className="text-sm text-gray-600">Money in Wallet</p>
-            <p className="text-xl font-bold">$5,600</p>
+            <p className="text-xl font-bold">₹5,600</p>
           </div>
         </div>
 

@@ -130,7 +130,7 @@ const WalletComponent = () => {
               </div>
               <div className="mt-4">
                 <p className="text-4xl font-bold text-white">
-                  ${balance.toFixed(2)}
+                  ₹{balance.toFixed(2)}
                 </p>
                 <p className="text-gray-400 mt-2">Available for withdrawal</p>
               </div>
@@ -161,14 +161,14 @@ const WalletComponent = () => {
                   <ArrowUpRight className="text-green-500" size={20} />
                   <span className="text-gray-600">Income</span>
                 </div>
-                <span className="font-semibold">$1,500.00</span>
+                <span className="font-semibold">₹1,500.00</span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <ArrowDownRight className="text-red-500" size={20} />
                   <span className="text-gray-600">Withdrawals</span>
                 </div>
-                <span className="font-semibold">$200.00</span>
+                <span className="font-semibold">₹200.00</span>
               </div>
             </div>
           </div>
@@ -209,7 +209,7 @@ const WalletComponent = () => {
                         <Clock size={20} className="text-gray-400" />
                         <h4 className="font-medium text-gray-700">Pending</h4>
                       </div>
-                      <p className="text-2xl font-semibold">$0.00</p>
+                      <p className="text-2xl font-semibold">₹0.00</p>
                     </div>
                     <div className="p-4 bg-gray-50 rounded-lg">
                       <div className="flex items-center gap-2 mb-2">
@@ -218,7 +218,7 @@ const WalletComponent = () => {
                           Total Earned
                         </h4>
                       </div>
-                      <p className="text-2xl font-semibold">$1,500.00</p>
+                      <p className="text-2xl font-semibold">₹1,500.00</p>
                     </div>
                     <div className="p-4 bg-gray-50 rounded-lg">
                       <div className="flex items-center gap-2 mb-2">
@@ -227,7 +227,7 @@ const WalletComponent = () => {
                           Withdrawals
                         </h4>
                       </div>
-                      <p className="text-2xl font-semibold">$200.00</p>
+                      <p className="text-2xl font-semibold">₹200.00</p>
                     </div>
                   </div>
                 </div>
@@ -258,7 +258,7 @@ const WalletComponent = () => {
                       </div>
                       <div className="text-right">
                         <p className="font-semibold">
-                          ${transaction.amount.toFixed(2)}
+                          ₹{transaction.amount.toFixed(2)}
                         </p>
                         <p className="text-sm text-gray-500 capitalize">
                           {transaction.status}
@@ -291,7 +291,7 @@ const WalletComponent = () => {
                 </label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                    $
+                    ₹
                   </span>
                   <input
                     type="number"

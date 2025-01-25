@@ -14,6 +14,8 @@ import Profile from './Components/Profile';
 import Wallet from './Components/Wallet';
 import MyBookingsComponent from './Components/MyBookings';
 import SettingsComponent from './Components/SettingsComponent';
+import PageNotFound from './Pages/PageNotFound';
+import AboutUs from './Pages/AboutUs';
 
 const App = () => {
   return (
@@ -22,7 +24,7 @@ const App = () => {
         <NavBar />
         <div className="flex-grow">
           <Routes>
-            <Route path="/" element={<Home />} />
+            <Route path="/home" element={<Home />} />
             <Route path="/available-cars" element={<AvailableCars />} />
             <Route path="/cars-added" element={<CarsAdded />} />
             <Route path="/auth" element={<Auth />} />
@@ -35,6 +37,8 @@ const App = () => {
             <Route path='/bookings' element={<MyBookingsComponent />} />
             <Route path='/medashboard' element={<MechanicDashboard />} />
             <Route path='/admindashboard' element={<AdminDashboard />} />
+            <Route path='/about' element={<AboutUs />} />
+            <Route path="*" element={<PageNotFound />} />
           </Routes>
         </div>
       </div>

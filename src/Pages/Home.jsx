@@ -3,6 +3,7 @@ import { Car, Bike, Calendar, MapPin, Clock, Store, DollarSign, Users } from 'lu
 import Lottie from 'lottie-react';
 import carAnimation from '../assets/lottie/car-animation.json';
 import Loader from '../Components/Loader';
+import { Link, useNavigate } from 'react-router-dom';
 import Footer from '../Components/Footer';  // Add this import
 
 const Home = () => {
@@ -18,6 +19,8 @@ const Home = () => {
       setIsLoading(false);
     }, 2000);
   }, []);
+
+  const navigate = useNavigate();
 
   const daysInMonth = (date) => {
     return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -245,7 +248,7 @@ const Home = () => {
               </div>
               <h3 className="text-xl font-semibold mb-4">Rent Out Your Vehicle</h3>
               <p className="text-gray-600 mb-6">Turn your idle vehicle into income. Set your own rates and availability, and earn money while helping your community.</p>
-              <button className="bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors w-full">
+              <button className="bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors w-full" onClick={() => navigate('/cars-added')}>
                 List Your Vehicle
               </button>
             </div>
@@ -321,9 +324,7 @@ const Home = () => {
             <h2 className="text-4xl font-bold mb-6">Ready to Get Started?</h2>
             <p className="text-gray-300 mb-8">Join our platform today and become part of the future of vehicle rental services</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-white text-black px-8 py-4 rounded-lg hover:bg-gray-100 transition-colors">
-                Register Now
-              </button>
+              <Link to="/auth" className="bg-white text-black px-8 py-4 rounded-lg hover:bg-gray-100 transition-colors">Register Now</Link>
               <button className="border border-white px-8 py-4 rounded-lg hover:bg-white hover:text-black transition-colors">
                 Learn More
               </button>

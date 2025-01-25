@@ -73,7 +73,7 @@ const ManagerDashboard = () => {
           <div className="bg-white p-4 rounded-lg shadow-sm hover:cursor-pointer">
             <Wallet className="w-6 h-6 text-green-600 mb-1" />
             <p className="text-sm text-gray-600">Money in wallet</p>
-            <p className="text-xl font-bold">$24,500</p>
+            <p className="text-xl font-bold">₹24,500</p>
           </div>
         </div>
 

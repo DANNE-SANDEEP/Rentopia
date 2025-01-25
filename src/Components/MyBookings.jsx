@@ -29,13 +29,13 @@ const MyBookingsComponent = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   const currentBookings = [
-    { id: 1, type: 'car', model: 'Tesla Model 3', startDate: '2025-01-10', endDate: '2025-01-15', location: 'San Francisco', price: 450 },
-    { id: 2, type: 'bike', model: 'Mountain Bike', startDate: '2025-01-20', endDate: '2025-01-22', location: 'Yosemite', price: 75 },
+    { id: 1, type: 'car', model: 'Tesla Model 3', startDate: '2025-01-10', endDate: '2025-01-15', location: 'San Francisco', price: 37000 },
+    { id: 2, type: 'bike', model: 'Mountain Bike', startDate: '2025-01-20', endDate: '2025-01-22', location: 'Yosemite', price: 6200 },
   ];
 
   const pastBookings = [
-    { id: 3, type: 'car', model: 'Ford Mustang', startDate: '2024-12-05', endDate: '2024-12-07', location: 'Los Angeles', price: 200 },
-    { id: 4, type: 'bike', model: 'City Bike', startDate: '2024-12-15', endDate: '2024-12-16', location: 'San Diego', price: 30 },
+    { id: 3, type: 'car', model: 'Ford Mustang', startDate: '2024-12-05', endDate: '2024-12-07', location: 'Los Angeles', price: 16500 },
+    { id: 4, type: 'bike', model: 'City Bike', startDate: '2024-12-15', endDate: '2024-12-16', location: 'San Diego', price: 2500 },
   ];
   useEffect(() => {
     setTimeout(() => {
@@ -66,7 +66,7 @@ const MyBookingsComponent = () => {
             {booking.type.charAt(0).toUpperCase() + booking.type.slice(1)}
           </p>
         </div>
-        <p className="text-2xl font-bold">${booking.price}</p>
+        <p className="text-2xl font-bold">₹{booking.price}</p>
       </div>
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div className="flex items-center">

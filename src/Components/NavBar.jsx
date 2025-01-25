@@ -43,7 +43,7 @@ const NavBar = () => {
         setIsProfileDropdownOpen(false);
   
         // Redirect to home page or login page
-        window.location.href = "/";
+        window.location.href = "/home";
       } else {
         const errorData = await response.json();
         console.error("Logout failed:", errorData.errorMessage);
@@ -59,12 +59,12 @@ const NavBar = () => {
       <div className="max-w-[1440px] mx-auto">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-24">
-            <Link to="/" className="text-white text-2xl font-medium">
+            <Link to="/home" className="text-white text-2xl font-medium">
               <span className="font-bold">Rent</span>opia<span className="font-bold">.</span>
             </Link>
 
             <div className="hidden md:flex items-center space-x-4">
-              <Link to="/" className="text-white px-4 py-2 rounded-full hover:bg-gray-300/30 transition-all duration-200 text-base">
+              <Link to="/home" className="text-white px-4 py-2 rounded-full hover:bg-gray-300/30 transition-all duration-200 text-base">
                 Home
               </Link>
               <Link to="/available-cars" className="text-white px-4 py-2 rounded-full hover:bg-gray-300/30 transition-all duration-200 text-base">
@@ -139,7 +139,7 @@ const NavBar = () => {
         }`}>
           <div className="flex flex-col p-4">
             <div className="flex justify-between items-center mb-8">
-              <Link to="/" className="text-white text-2xl font-medium" onClick={toggleMenu}>
+              <Link to="/home" className="text-white text-2xl font-medium" onClick={toggleMenu}>
                 Rentopia
               </Link>
               <button onClick={toggleMenu} className="text-white focus:outline-none" aria-label="Close menu">
@@ -148,7 +148,7 @@ const NavBar = () => {
             </div>
 
             <div className="flex flex-col space-y-6">
-              <Link to="/" className="text-white text-lg" onClick={toggleMenu}>
+              <Link to="/home" className="text-white text-lg" onClick={toggleMenu}>
                 Home
               </Link>
               <Link to="/available-cars" className="text-white text-lg" onClick={toggleMenu}>

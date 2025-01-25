@@ -13,7 +13,7 @@ import {
   Users,
   UserPlus,
   Settings,
-  DollarSign,
+  IndianRupee,
   TrendingUp,
   User,
   Trash2,
@@ -478,9 +478,9 @@ const AdminDashboard = () => {
           <h1 className="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
           <div className="flex space-x-4">
             <div className="bg-white p-4 rounded-lg shadow-sm">
-              <DollarSign className="w-6 h-6 text-green-600 mb-1" />
+              <IndianRupee className="w-6 h-6 text-green-600 mb-1" />
               <p className="text-sm text-gray-600">Total Revenue</p>
-              <p className="text-xl font-bold">$850,000</p>
+              <p className="text-xl font-bold">₹850,000</p>
             </div>
             <button
               onClick={() => setShowMessages(!showMessages)}
