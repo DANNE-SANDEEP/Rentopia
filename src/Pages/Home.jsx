@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Car, Bike, Calendar, MapPin, Clock, Store, DollarSign, Users } from 'lucide-react';
 import Lottie from 'lottie-react';
 import carAnimation from '../assets/lottie/car-animation.json';
@@ -7,13 +7,64 @@ import { Link, useNavigate } from 'react-router-dom';
 import Footer from '../Components/Footer';  // Add this import
 
 const Home = () => {
-  const [showCalendar, setShowCalendar] = useState(false);
-  const [showTimePicker, setShowTimePicker] = useState(false);
-  const [selectedDate, setSelectedDate] = useState('Today');
-  const [selectedTime, setSelectedTime] = useState('Now');
-  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [showStartCalendar, setShowStartCalendar] = useState(false);
+  const [showEndCalendar, setShowEndCalendar] = useState(false);
+  const [showStartTimePicker, setShowStartTimePicker] = useState(false);
+  const [showEndTimePicker, setShowEndTimePicker] = useState(false);
+  const [selectedStartDate, setSelectedStartDate] = useState('Today');
+  const [selectedEndDate, setSelectedEndDate] = useState('Tomorrow');
+  const [selectedStartTime, setSelectedStartTime] = useState('Now');
+  const [selectedEndTime, setSelectedEndTime] = useState('Now');
+  const [currentStartMonth, setCurrentStartMonth] = useState(new Date());
+  const [currentEndMonth, setCurrentEndMonth] = useState(new Date());
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedVehicleType, setSelectedVehicleType] = useState('car');
+  const [showLocationPicker, setShowLocationPicker] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState('Phagwara');
   
+  const locations = [
+    'Phagwara',
+    'Jalandhar',
+    'Vijayawada',
+    'Hyderabad',
+    'Bengalore',
+    'Chennai',
+    'Coimbatore'
+  ];
+
+  // Add useRef for dropdown containers
+  const locationRef = useRef(null);
+  const startDateRef = useRef(null);
+  const startTimeRef = useRef(null);
+  const endDateRef = useRef(null);
+  const endTimeRef = useRef(null);
+
+  // Add useEffect for click outside handler
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (locationRef.current && !locationRef.current.contains(event.target)) {
+        setShowLocationPicker(false);
+      }
+      if (startDateRef.current && !startDateRef.current.contains(event.target)) {
+        setShowStartCalendar(false);
+      }
+      if (startTimeRef.current && !startTimeRef.current.contains(event.target)) {
+        setShowStartTimePicker(false);
+      }
+      if (endDateRef.current && !endDateRef.current.contains(event.target)) {
+        setShowEndCalendar(false);
+      }
+      if (endTimeRef.current && !endTimeRef.current.contains(event.target)) {
+        setShowEndTimePicker(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   useEffect(() => {
     setTimeout(() => {
       setIsLoading(false);
@@ -53,7 +104,7 @@ const Home = () => {
     <div className="h-screen overflow-y-auto">
       {/* Hero Section */}
       <section className="h-screen  ">
-        <div className="h-full max-w-[1570px] mx-auto">
+        <div className="h-full max-w-[1400px] mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 h-full">
             {/* Left Side - Booking Interface */}
             <div className="p-8 lg:p-16 flex flex-col justify-center">
@@ -64,11 +115,25 @@ const Home = () => {
 
               {/* Vehicle Type Selection */}
               <div className="flex gap-4 mb-6">
-                <button className="flex items-center gap-2 px-6 py-3 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors">
+                <button 
+                  onClick={() => setSelectedVehicleType('car')}
+                  className={`flex items-center gap-2 px-6 py-3 rounded-full transition-colors ${
+                    selectedVehicleType === 'car' 
+                      ? 'bg-black text-white' 
+                      : 'bg-gray-100 hover:bg-gray-200'
+                  }`}
+                >
                   <Car size={20} />
                   <span>Car</span>
                 </button>
-                <button className="flex items-center gap-2 px-6 py-3 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors">
+                <button 
+                  onClick={() => setSelectedVehicleType('bike')}
+                  className={`flex items-center gap-2 px-6 py-3 rounded-full transition-colors ${
+                    selectedVehicleType === 'bike' 
+                      ? 'bg-black text-white' 
+                      : 'bg-gray-100 hover:bg-gray-200'
+                  }`}
+                >
                   <Bike size={20} />
                   <span>Bike</span>
                 </button>
@@ -76,53 +141,91 @@ const Home = () => {
 
               {/* Booking Form */}
               <div className="space-y-4 mb-6">
-                <div className="bg-gray-100 p-4 rounded-lg flex items-center gap-3">
-                  <MapPin className="text-gray-500" />
-                  <input
-                    type="text"
-                    placeholder="Pickup location"
-                    className="bg-transparent w-full outline-none"
-                  />
+                {/* Location Input */}
+                <div className="relative" ref={locationRef}>
+                  <button
+                    onClick={() => {
+                      setShowLocationPicker(!showLocationPicker);
+                      setShowStartCalendar(false);
+                      setShowEndCalendar(false);
+                      setShowStartTimePicker(false);
+                      setShowEndTimePicker(false);
+                    }}
+                    className="w-full bg-gray-100 p-4 rounded-lg flex items-center justify-between gap-3 hover:bg-gray-200 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <MapPin className="text-gray-500" />
+                      <span>{selectedLocation}</span>
+                    </div>
+                    <svg 
+                      className="w-4 h-4 text-gray-500" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                        strokeWidth="2" 
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </button>
+
+                  {/* Location Picker Popup */}
+                  {showLocationPicker && (
+                    <div className="absolute z-20 mt-2 bg-white rounded-lg shadow-lg border p-4 w-64">
+                      <div className="max-h-60 overflow-y-auto">
+                        {locations.map((location) => (
+                          <button
+                            key={location}
+                            onClick={() => {
+                              setSelectedLocation(location);
+                              setShowLocationPicker(false);
+                            }}
+                            className="w-full text-left px-4 py-2 hover:bg-gray-100 rounded"
+                          >
+                            {location}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <div className="bg-gray-100 p-4 rounded-lg flex items-center gap-3">
-                  <MapPin className="text-gray-500" />
-                  <input
-                    type="text"
-                    placeholder="Dropoff location"
-                    className="bg-transparent w-full outline-none"
-                  />
-                </div>
+
+                {/* Start Date and Time */}
                 <div className="grid grid-cols-2 gap-4">
-                  {/* Date Picker */}
-                  <div className="relative">
+                  <div className="relative" ref={startDateRef}>
                     <button
                       onClick={() => {
-                        setShowCalendar(!showCalendar);
-                        setShowTimePicker(false);
+                        setShowStartCalendar(!showStartCalendar);
+                        setShowEndCalendar(false);
+                        setShowStartTimePicker(false);
+                        setShowEndTimePicker(false);
                       }}
                       className="w-full bg-gray-100 p-4 rounded-lg flex items-center justify-between gap-3"
                     >
                       <div className="flex items-center gap-3">
                         <Calendar className="text-gray-500" />
-                        <span>{selectedDate}</span>
+                        <span>Start: {selectedStartDate}</span>
                       </div>
                     </button>
                     
-                    {/* Calendar Popup */}
-                    {showCalendar && (
+                    {/* Start Calendar Popup */}
+                    {showStartCalendar && (
                       <div className="absolute z-20 mt-2 bg-white rounded-lg shadow-lg border p-4">
                         <div className="flex justify-between items-center mb-4">
                           <button
-                            onClick={() => setCurrentMonth(new Date(currentMonth.setMonth(currentMonth.getMonth() - 1)))}
+                            onClick={() => setCurrentStartMonth(new Date(currentStartMonth.setMonth(currentStartMonth.getMonth() - 1)))}
                             className="p-1 hover:bg-gray-100 rounded"
                           >
                             ←
                           </button>
                           <span className="font-medium">
-                            {currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
+                            {currentStartMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
                           </span>
                           <button
-                            onClick={() => setCurrentMonth(new Date(currentMonth.setMonth(currentMonth.getMonth() + 1)))}
+                            onClick={() => setCurrentStartMonth(new Date(currentStartMonth.setMonth(currentStartMonth.getMonth() + 1)))}
                             className="p-1 hover:bg-gray-100 rounded"
                           >
                             →
@@ -136,17 +239,17 @@ const Home = () => {
                           ))}
                         </div>
                         <div className="grid grid-cols-7 gap-1">
-                          {[...Array(firstDayOfMonth(currentMonth))].map((_, i) => (
+                          {[...Array(firstDayOfMonth(currentStartMonth))].map((_, i) => (
                             <div key={`empty-${i}`} />
                           ))}
-                          {[...Array(daysInMonth(currentMonth))].map((_, i) => {
-                            const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i + 1);
+                          {[...Array(daysInMonth(currentStartMonth))].map((_, i) => {
+                            const date = new Date(currentStartMonth.getFullYear(), currentStartMonth.getMonth(), i + 1);
                             return (
                               <button
                                 key={i}
                                 onClick={() => {
-                                  setSelectedDate(formatDate(date));
-                                  setShowCalendar(false);
+                                  setSelectedStartDate(formatDate(date));
+                                  setShowStartCalendar(false);
                                 }}
                                 className="p-2 text-center hover:bg-gray-100 rounded"
                               >
@@ -159,31 +262,139 @@ const Home = () => {
                     )}
                   </div>
 
-                  {/* Time Picker */}
-                  <div className="relative">
+                  <div className="relative" ref={startTimeRef}>
                     <button
                       onClick={() => {
-                        setShowTimePicker(!showTimePicker);
-                        setShowCalendar(false);
+                        setShowStartTimePicker(!showStartTimePicker);
+                        setShowStartCalendar(false);
+                        setShowEndCalendar(false);
+                        setShowEndTimePicker(false);
                       }}
                       className="w-full bg-gray-100 p-4 rounded-lg flex items-center justify-between gap-3"
                     >
                       <div className="flex items-center gap-3">
                         <Clock className="text-gray-500" />
-                        <span>{selectedTime}</span>
+                        <span>{selectedStartTime}</span>
                       </div>
                     </button>
 
-                    {/* Time Picker Popup */}
-                    {showTimePicker && (
+                    {/* Start Time Picker Popup */}
+                    {showStartTimePicker && (
                       <div className="absolute z-20 mt-2 bg-white rounded-lg shadow-lg border p-4 w-64">
                         <div className="max-h-60 overflow-y-auto">
                           {generateTimeSlots().map((time) => (
                             <button
                               key={time}
                               onClick={() => {
-                                setSelectedTime(time);
-                                setShowTimePicker(false);
+                                setSelectedStartTime(time);
+                                setShowStartTimePicker(false);
+                              }}
+                              className="w-full text-left px-4 py-2 hover:bg-gray-100 rounded"
+                            >
+                              {time}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* End Date and Time */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="relative" ref={endDateRef}>
+                    <button
+                      onClick={() => {
+                        setShowEndCalendar(!showEndCalendar);
+                        setShowStartCalendar(false);
+                        setShowStartTimePicker(false);
+                        setShowEndTimePicker(false);
+                      }}
+                      className="w-full bg-gray-100 p-4 rounded-lg flex items-center justify-between gap-3"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Calendar className="text-gray-500" />
+                        <span>End: {selectedEndDate}</span>
+                      </div>
+                    </button>
+                    
+                    {/* End Calendar Popup */}
+                    {showEndCalendar && (
+                      <div className="absolute z-20 mt-2 bg-white rounded-lg shadow-lg border p-4">
+                        <div className="flex justify-between items-center mb-4">
+                          <button
+                            onClick={() => setCurrentEndMonth(new Date(currentEndMonth.setMonth(currentEndMonth.getMonth() - 1)))}
+                            className="p-1 hover:bg-gray-100 rounded"
+                          >
+                            ←
+                          </button>
+                          <span className="font-medium">
+                            {currentEndMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
+                          </span>
+                          <button
+                            onClick={() => setCurrentEndMonth(new Date(currentEndMonth.setMonth(currentEndMonth.getMonth() + 1)))}
+                            className="p-1 hover:bg-gray-100 rounded"
+                          >
+                            →
+                          </button>
+                        </div>
+                        <div className="grid grid-cols-7 gap-1 mb-2">
+                          {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(day => (
+                            <div key={day} className="text-center text-sm font-medium">
+                              {day}
+                            </div>
+                          ))}
+                        </div>
+                        <div className="grid grid-cols-7 gap-1">
+                          {[...Array(firstDayOfMonth(currentEndMonth))].map((_, i) => (
+                            <div key={`empty-${i}`} />
+                          ))}
+                          {[...Array(daysInMonth(currentEndMonth))].map((_, i) => {
+                            const date = new Date(currentEndMonth.getFullYear(), currentEndMonth.getMonth(), i + 1);
+                            return (
+                              <button
+                                key={i}
+                                onClick={() => {
+                                  setSelectedEndDate(formatDate(date));
+                                  setShowEndCalendar(false);
+                                }}
+                                className="p-2 text-center hover:bg-gray-100 rounded"
+                              >
+                                {i + 1}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="relative" ref={endTimeRef}>
+                    <button
+                      onClick={() => {
+                        setShowEndTimePicker(!showEndTimePicker);
+                        setShowStartCalendar(false);
+                        setShowEndCalendar(false);
+                        setShowStartTimePicker(false);
+                      }}
+                      className="w-full bg-gray-100 p-4 rounded-lg flex items-center justify-between gap-3"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Clock className="text-gray-500" />
+                        <span>{selectedEndTime}</span>
+                      </div>
+                    </button>
+
+                    {/* End Time Picker Popup */}
+                    {showEndTimePicker && (
+                      <div className="absolute z-20 mt-2 bg-white rounded-lg shadow-lg border p-4 w-64">
+                        <div className="max-h-60 overflow-y-auto">
+                          {generateTimeSlots().map((time) => (
+                            <button
+                              key={time}
+                              onClick={() => {
+                                setSelectedEndTime(time);
+                                setShowEndTimePicker(false);
                               }}
                               className="w-full text-left px-4 py-2 hover:bg-gray-100 rounded"
                             >
@@ -238,7 +449,7 @@ const Home = () => {
 
       {/* Partner With Us Section */}
       <section className="h-screen bg-gray-50">
-        <div className="h-full max-w-[1570px] mx-auto px-8 flex flex-col justify-center">
+        <div className="h-full max-w-[1400px] mx-auto px-8 flex flex-col justify-center">
           <h2 className="text-4xl font-bold mb-12 text-center">Join Our Network</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Rent Your Vehicle */}
@@ -282,7 +493,7 @@ const Home = () => {
 
       {/* Benefits Section */}
       <section className="h-screen">
-        <div className="h-full max-w-[1570px] mx-auto px-8 flex flex-col justify-center">
+        <div className="h-full max-w-[1400px] mx-auto px-8 flex flex-col justify-center">
           <h2 className="text-4xl font-bold mb-12 text-center">Why Partner With Us</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div className="text-center">

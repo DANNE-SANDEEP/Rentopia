@@ -208,7 +208,7 @@ const Help = () => {
     return <Loader />;
   }
   return (
-    <section className="min-h-screen max-w-[1570px] mx-auto p-8 lg:p-16">
+    <section className="min-h-screen max-w-[1400px] mx-auto p-8 lg:p-16">
       <h1 className="text-5xl mb-12">
         Need help? We're here
         <br /> <span className="font-bold">to assist you</span>

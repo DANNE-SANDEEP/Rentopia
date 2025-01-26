@@ -82,7 +82,7 @@ const AvailableCars = () => {
     return <Loader />;
   }
   return (
-    <div className=" min-h-screen max-w-[1480px] mx-auto text-gray-800 p-4">
+    <div className=" min-h-screen max-w-[1300px] mx-auto text-gray-800 p-4">
       <div className="container mx-auto">
         {/* Header with slide-in animation */}
         <div className="flex items-center gap-2 mb-6 animate-fade-in">

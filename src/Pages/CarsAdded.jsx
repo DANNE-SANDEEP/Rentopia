@@ -382,7 +382,7 @@ const CarsAdded = () => {
   if (!isLoggedIn) return <LoginPrompt />;
 
   return (
-    <div className="min-h-screen text-gray-800 max-w-[1480px] mx-auto">
+    <div className="min-h-screen text-gray-800 max-w-[13w00px] mx-auto">
       <div className="container mx-auto p-4">
         <div className="flex justify-between items-center mb-6 pb-4">
           <h1 className="text-2xl sm:text-3xl font-bold">Cars Added</h1>
